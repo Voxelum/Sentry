@@ -20,11 +20,6 @@ public class SentrySuppBlock extends Block {
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-        return super.getShape(state, worldIn, pos, context);
-    }
-
-    @Override
     public boolean isValidPosition(BlockState state, IWorldReader worldIn, BlockPos pos) {
         BlockPos down = pos.down();
         if (worldIn.getBlockState(down).getBlock() == Sentry.SENTRY_BASE_BLOCK.get()) {

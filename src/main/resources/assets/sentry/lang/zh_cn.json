@@ -1,4 +1,5 @@
 {
-  "block.sentry.sentry_supp_block": "炮塔支持方块",
-  "block.sentry.sentry_base_block": "炮台地基"
+  "block.sentry.sentry_supp_block": "炮身",
+  "block.sentry.sentry_base_block": "炮基",
+  "block.sentry.sentry_shooter_block": "炮台"
 }

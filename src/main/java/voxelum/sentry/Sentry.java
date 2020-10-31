@@ -23,10 +23,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import voxelum.sentry.block.SentryBaseBlock;
+import voxelum.sentry.block.SentryShooterBlock;
 import voxelum.sentry.block.SentrySuppBlock;
 import voxelum.sentry.container.SentryBaseContainer;
 import voxelum.sentry.screen.SentryBaseScreen;
 import voxelum.sentry.tileentity.SentryBaseTileEntity;
+import voxelum.sentry.tileentity.SentryShooterTileEntity;
 
 @Mod(Sentry.MODID)
 public class Sentry {
@@ -40,6 +42,7 @@ public class Sentry {
 
     public static final String SENTRY_SUPP_BLOCK_NAME = "sentry_supp_block";
     public static final String SENTRY_BASE_BLOCK_NAME = "sentry_base_block";
+    public static final String SENTRY_SHOOTER_BLOCK_NAME = "sentry_shooter_block";
 
     public static final RegistryObject<Block> SENTRY_BASE_BLOCK = BLOCKS.register(SENTRY_BASE_BLOCK_NAME,
             () -> new SentryBaseBlock(Block.Properties
@@ -60,6 +63,16 @@ public class Sentry {
                     .sound(SoundType.WOOD)));
     public static final RegistryObject<Item> SENTRY_SUPP_BLOCK_ITEM = ITEMS.register(SENTRY_SUPP_BLOCK_NAME,
             () -> new BlockItem(SENTRY_SUPP_BLOCK.get(), new Item.Properties().group(ItemGroup.BUILDING_BLOCKS)));
+
+    public static final RegistryObject<Block> SENTRY_SHOOTER_BLOCK = BLOCKS.register(SENTRY_SHOOTER_BLOCK_NAME,
+            () -> new SentryShooterBlock(Block.Properties.create(Material.WOOD)
+                    .hardnessAndResistance(2.0F, 6.0F)
+                    .sound(SoundType.WOOD)));
+    public static final RegistryObject<Item> SENTRY_SHOOTER_BLOCK_ITEM = ITEMS.register(SENTRY_SHOOTER_BLOCK_NAME,
+            () -> new BlockItem(SENTRY_SHOOTER_BLOCK.get(), new Item.Properties().group(ItemGroup.BUILDING_BLOCKS)));
+    public static final RegistryObject<TileEntityType<SentryShooterTileEntity>> SENTRY_SHOOTER_TILE_ENTITY = TILE.register("sentry_shooter_tile_entity",
+            () -> TileEntityType.Builder.create(SentryShooterTileEntity::new, SENTRY_SHOOTER_BLOCK.get())
+                    .build(null));
 
     public Sentry() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();

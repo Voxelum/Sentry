@@ -1,4 +1,5 @@
 {
   "block.sentry.sentry_supp_block": "Sentry Support Block",
-  "block.sentry.sentry_base_block": "Sentry Base Block"
+  "block.sentry.sentry_base_block": "Sentry Base Block",
+  "block.sentry.sentry_shooter_block": "Sentry Shooter Block"
 }
