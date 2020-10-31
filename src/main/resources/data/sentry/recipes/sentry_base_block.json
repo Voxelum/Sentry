@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xyx",
+    "xyx",
+    "zzz"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:logs"
+    },
+    "y": {
+      "item": "minecraft:planks"
+    },
+    "z": {
+      "item": "minecraft:cobblestone"
+    }
+  },
+  "result": {
+    "item": "sentry:sentry_base_block"
+  }
+}
