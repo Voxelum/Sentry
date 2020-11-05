@@ -59,6 +59,7 @@ public class Sentry {
 
     public static final RegistryObject<Block> SENTRY_SUPP_BLOCK = BLOCKS.register(SENTRY_SUPP_BLOCK_NAME,
             () -> new SentrySuppBlock(Block.Properties.create(Material.WOOD)
+                    .tickRandomly()
                     .hardnessAndResistance(2.0F, 6.0F)
                     .sound(SoundType.WOOD)));
     public static final RegistryObject<Item> SENTRY_SUPP_BLOCK_ITEM = ITEMS.register(SENTRY_SUPP_BLOCK_NAME,
@@ -66,6 +67,7 @@ public class Sentry {
 
     public static final RegistryObject<Block> SENTRY_SHOOTER_BLOCK = BLOCKS.register(SENTRY_SHOOTER_BLOCK_NAME,
             () -> new SentryShooterBlock(Block.Properties.create(Material.WOOD)
+                    .tickRandomly()
                     .hardnessAndResistance(2.0F, 6.0F)
                     .sound(SoundType.WOOD)));
     public static final RegistryObject<Item> SENTRY_SHOOTER_BLOCK_ITEM = ITEMS.register(SENTRY_SHOOTER_BLOCK_NAME,

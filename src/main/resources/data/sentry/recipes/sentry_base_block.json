@@ -7,10 +7,10 @@
   ],
   "key": {
     "x": {
-      "item": "minecraft:logs"
+      "tag": "minecraft:logs"
     },
     "y": {
-      "item": "minecraft:planks"
+      "tag": "minecraft:planks"
     },
     "z": {
       "item": "minecraft:cobblestone"

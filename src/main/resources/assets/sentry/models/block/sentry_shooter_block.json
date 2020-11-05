@@ -7,7 +7,7 @@
 		"3": "minecraft:block/barrel_side",
 		"7": "minecraft:block/chiseled_stone_bricks",
 		"8": "minecraft:block/dispenser_front_vertical",
-		"particle": "minecraft:block/oak_log"
+		"particle": "block/oak_log"
 	},
 	"elements": [
 		{
