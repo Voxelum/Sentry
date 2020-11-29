@@ -6,7 +6,7 @@
 # The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
 modLoader="javafml" #mandatory
 # A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="[28,)" #mandatory (28 is current forge version)
+loaderVersion="[27,)" #mandatory (28 is current forge version)
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="http://my.issue.tracker/" #optional
 # A list of mods - how many allowed here is determined by the individual mod loader
@@ -29,28 +29,31 @@ credits="Thanks for this example mod goes to Java" #optional
 authors="Eric John Reter" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-This is a long form description of the mod. You can write whatever you want here
+古老、传统又实用的箭塔。居家旅行必备，是你身边最强大可靠的守护。
 
-Have some lorem ipsum.
+添加了三种箭塔方块。分别是炮基、炮身、炮台。
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed mollis lacinia magna. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Sed sagittis luctus odio eu tempus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque volutpat ligula eget lacus auctor sagittis. In hac habitasse platea dictumst. Nunc gravida elit vitae sem vehicula efficitur. Donec mattis ipsum et arcu lobortis, eleifend sagittis sem rutrum. Cras pharetra quam eget posuere fermentum. Sed id tincidunt justo. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+其中炮基负责装箭，炮塔负责🐍。放置顺序从下到上必须是炮基、炮身、炮台。
+
+你需要右键点击炮基来将箭矢放入其中，如果炮身、炮台放置顺序正确，炮台将会以固定频率射击箭矢。目前只支持箭矢射击。
+
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.sentry]] #optional
     # the modid of the dependency
-    modId="sentry" #mandatory
+    modId="forge" #mandatory
     # Does this dependency have to exist - if not, ordering below must be specified
     mandatory=true #mandatory
     # The version range of the depsendency
-    versionRange="[28,)" #mandatory
+    versionRange="[27,)" #mandatory
     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
     ordering="NONE"
     # Side this dependency is applied on - BOTH, CLIENT or SERVER
     side="BOTH"
 # Here's another dependency
 [[dependencies.sentry]]
-    modId="sentry"
+    modId="minecraft"
     mandatory=true
-    versionRange="[1.14.4]"
+    versionRange="[1.14.3,1.14.4]"
     ordering="NONE"
     side="BOTH"
