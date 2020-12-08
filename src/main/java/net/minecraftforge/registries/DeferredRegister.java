@@ -22,7 +22,6 @@ package net.minecraftforge.registries;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.RegistryObject;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -80,7 +79,7 @@ public class DeferredRegister<T extends IForgeRegistryEntry<T>>
         Objects.requireNonNull(name);
         Objects.requireNonNull(sup);
         final ResourceLocation key = new ResourceLocation(modid, name);
-        RegistryObject<I> ret = RegistryObject.of(key, this.type);
+        RegistryObject<I> ret = RegistryObject.of(key.toString(), () -> this.type.getRegistrySuperType());
         if (entries.putIfAbsent((RegistryObject<T>) ret, () -> sup.get().setRegistryName(key)) != null) {
             throw new IllegalArgumentException("Duplicate registration " + name);
         }

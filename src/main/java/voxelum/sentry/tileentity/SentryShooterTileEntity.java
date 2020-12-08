@@ -5,6 +5,7 @@ import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.MonsterEntity;
+import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ArrowItem;
@@ -119,6 +120,9 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
 
     private boolean isValidTarget(Entity entity) {
         if (entity instanceof MonsterEntity) {
+            return true;
+        }
+        if (entity instanceof SlimeEntity) {
             return true;
         }
         return false;
