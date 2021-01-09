@@ -1,17 +1,19 @@
 package voxelum.sentry.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ContainerBlock;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import voxelum.sentry.Sentry;
 import voxelum.sentry.tileentity.SentryShooterTileEntity;
 
@@ -39,9 +41,19 @@ public class SentryShooterBlock extends ContainerBlock {
     }
 
     @Override
-    public void tick(BlockState state, World worldIn, BlockPos pos, Random random) {
+    public void tick(BlockState state, ServerWorld worldIn, BlockPos pos, Random random) {
         if (!state.isValidPosition(worldIn, pos)) {
             worldIn.destroyBlock(pos, true);
+        }
+    }
+
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        if (worldIn.isRemote) return;
+        SentryShooterTileEntity tileEntity = (SentryShooterTileEntity) worldIn.getTileEntity(pos);
+        if (placer instanceof PlayerEntity && tileEntity != null) {
+            tileEntity.setPlacer((PlayerEntity) placer);
+            tileEntity.setPos(pos);
         }
     }
 
@@ -66,8 +78,8 @@ public class SentryShooterBlock extends ContainerBlock {
     }
 
 
-    @Override
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.CUTOUT;
-    }
+//    @Override
+//    public BlockRenderLayer getRenderLayer() {
+//        return BlockRenderLayer.CUTOUT;
+//    }
 }

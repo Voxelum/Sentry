@@ -3,7 +3,6 @@ package voxelum.sentry.tileentity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,22 +30,6 @@ import java.util.UUID;
 
 @Mod.EventBusSubscriber
 public class SentryShooterTileEntity extends TileEntity implements ITickableTileEntity {
-    private static ThreadLocal<SentryShooterTileEntity> lastTile = new ThreadLocal<>();
-
-    @SubscribeEvent
-    public static void onPlaceBlock(BlockEvent.EntityPlaceEvent event) {
-        if (event.getWorld().isRemote()) return;
-        if (event.getPlacedBlock().getBlock() != Sentry.SENTRY_SHOOTER_BLOCK.get()) return;
-        Entity entity = event.getEntity();
-        if (entity instanceof PlayerEntity) {
-            PlayerEntity playerEntity = (PlayerEntity) entity;
-            SentryShooterTileEntity sentryShooterTileEntity = lastTile.get();
-            sentryShooterTileEntity.placerId = playerEntity.getUniqueID();
-            sentryShooterTileEntity.placer = playerEntity;
-        }
-        lastTile.set(null);
-    }
-
     private LivingEntity target;
     private int attackTick = 0;
     private int updateTargetTick = 0;
@@ -56,7 +39,11 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
 
     public SentryShooterTileEntity() {
         super(Sentry.SENTRY_SHOOTER_TILE_ENTITY.get());
-        lastTile.set(this);
+    }
+
+    public void setPlacer(PlayerEntity placer) {
+        this.placer = placer;
+        this.placerId = placer.getUniqueID();
     }
 
     @Override
@@ -86,7 +73,7 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
             ItemStack result = handler.extractItem(i, 1, true);
             if (result.getItem() instanceof ArrowItem) {
                 handler.extractItem(i, 1, false);
-                Vec3d vec3d = new Vec3d(this.target.posX - x, this.target.posY + this.target.getEyeHeight() - y, this.target.posZ - z).normalize();
+                Vec3d vec3d = new Vec3d(this.target.getPosX() - x, this.target.getPosY() + this.target.getEyeHeight() - y, this.target.getPosZ() - z).normalize();
                 ArrowEntity arrowEntity = new ArrowEntity(world, x + vec3d.x, y + vec3d.y, z + vec3d.z);
                 arrowEntity.shoot(vec3d.x, vec3d.y, vec3d.z, 3, 1);
                 world.addEntity(arrowEntity);
@@ -150,9 +137,11 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
     private void updateTarget() {
         World world = this.world;
         BlockPos pos = this.pos;
-        this.checkPlacer();
-        List<LivingEntity> entityList = (List) world.getEntitiesInAABBexcluding(this.placer, bb, this::isValidTarget);
-        EntityPredicate predicate = new EntityPredicate();
-        this.target = world.getClosestEntity(entityList, predicate, this.placer, pos.getX(), pos.getY(), pos.getZ());
+        if (bb != null) {
+            this.checkPlacer();
+            List<LivingEntity> entityList = (List) world.getEntitiesInAABBexcluding(this.placer, bb, this::isValidTarget);
+            EntityPredicate predicate = new EntityPredicate();
+            this.target = world.getClosestEntity(entityList, predicate, this.placer, pos.getX(), pos.getY(), pos.getZ());
+        }
     }
 }
