@@ -3,6 +3,7 @@ package voxelum.sentry.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
@@ -30,6 +31,14 @@ public class SentrySuppBlock extends Block {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
+        super.updateTick(worldIn, pos, state, rand);
+        if (!state.isValidPosition(worldIn, pos)) {
+            worldIn.destroyBlock(pos, true);
+        }
     }
 
     @Override

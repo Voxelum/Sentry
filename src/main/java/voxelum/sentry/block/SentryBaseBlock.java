@@ -1,7 +1,11 @@
 package voxelum.sentry.block;
 
 import net.minecraft.block.*;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.INamedContainerProvider;
@@ -17,6 +21,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.items.IItemHandler;
 import voxelum.sentry.Sentry;
 import voxelum.sentry.container.SentryBaseContainer;
@@ -24,36 +29,30 @@ import voxelum.sentry.tileentity.SentryBaseTileEntity;
 
 import javax.annotation.Nullable;
 
-public class SentryBaseBlock extends ContainerBlock {
+public class SentryBaseBlock extends BlockContainer {
     public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
 
-    public SentryBaseBlock(Properties properties) {
-        super(properties);
+    public SentryBaseBlock(Material material) {
+        super(material);
         this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
     }
 
     @Override
-    public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand handIn, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (player.getHeldItem(handIn).getItem() == Sentry.SENTRY_SUPP_BLOCK_ITEM.get()) {
             return false;
         }
         if (!worldIn.isRemote) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
             if (tileentity instanceof SentryBaseTileEntity) {
-                player.openContainer((INamedContainerProvider) tileentity);
+//                player.openContainer((INamedContainerProvider) tileentity);
             }
         }
         return true;
     }
 
-    @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
-        return new SentryBaseTileEntity();
-    }
-
-    @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
         if (stack.hasDisplayName()) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
             if (tileentity instanceof SentryBaseTileEntity) {
@@ -62,17 +61,18 @@ public class SentryBaseBlock extends ContainerBlock {
         }
     }
 
-    @Override
-    public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (state.getBlock() != newState.getBlock()) {
-            TileEntity tileentity = worldIn.getTileEntity(pos);
-            if (tileentity instanceof SentryBaseTileEntity) {
-//                InventoryHelper.dropInventoryItems(worldIn, pos, (SentryBaseTileEntity) tileentity);
-                worldIn.updateComparatorOutputLevel(pos, this);
-            }
-            super.onReplaced(state, worldIn, pos, newState, isMoving);
-        }
-    }
+
+//    @Override
+//    public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+//        if (state.getBlock() != newState.getBlock()) {
+//            TileEntity tileentity = worldIn.getTileEntity(pos);
+//            if (tileentity instanceof SentryBaseTileEntity) {
+////                InventoryHelper.dropInventoryItems(worldIn, pos, (SentryBaseTileEntity) tileentity);
+//                worldIn.updateComparatorOutputLevel(pos, this);
+//            }
+//            super.onReplaced(state, worldIn, pos, newState, isMoving);
+//        }
+//    }
 
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
@@ -102,5 +102,11 @@ public class SentryBaseBlock extends ContainerBlock {
     @Override
     public BlockRenderLayer getRenderLayer() {
         return BlockRenderLayer.CUTOUT;
+    }
+
+    @Nullable
+    @Override
+    public TileEntity createNewTileEntity(World worldIn, int meta) {
+        return new SentryBaseTileEntity();
     }
 }

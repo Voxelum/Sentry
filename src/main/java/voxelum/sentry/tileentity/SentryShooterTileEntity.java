@@ -1,25 +1,28 @@
 package voxelum.sentry.tileentity;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.monster.SlimeEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.item.ArrowItem;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.projectile.EntityTippedArrow;
+import net.minecraft.item.ItemArrow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -30,33 +33,21 @@ import java.util.List;
 import java.util.UUID;
 
 @Mod.EventBusSubscriber
-public class SentryShooterTileEntity extends TileEntity implements ITickableTileEntity {
-    private static ThreadLocal<SentryShooterTileEntity> lastTile = new ThreadLocal<>();
-
-    @SubscribeEvent
-    public static void onPlaceBlock(BlockEvent.EntityPlaceEvent event) {
-        if (event.getWorld().isRemote()) return;
-        if (event.getPlacedBlock().getBlock() != Sentry.SENTRY_SHOOTER_BLOCK.get()) return;
-        Entity entity = event.getEntity();
-        if (entity instanceof PlayerEntity) {
-            PlayerEntity playerEntity = (PlayerEntity) entity;
-            SentryShooterTileEntity sentryShooterTileEntity = lastTile.get();
-            sentryShooterTileEntity.placerId = playerEntity.getUniqueID();
-            sentryShooterTileEntity.placer = playerEntity;
-        }
-        lastTile.set(null);
-    }
-
+public class SentryShooterTileEntity extends TileEntity implements ITickable {
     private LivingEntity target;
     private int attackTick = 0;
     private int updateTargetTick = 0;
     private AxisAlignedBB bb;
     private UUID placerId;
-    private PlayerEntity placer;
+    private EntityPlayer placer;
 
     public SentryShooterTileEntity() {
         super(Sentry.SENTRY_SHOOTER_TILE_ENTITY.get());
-        lastTile.set(this);
+    }
+
+    public void setPlacer(EntityPlayer entity) {
+        this.placerId = entity.getUniqueID();
+        this.placer = entity;
     }
 
     @Override
@@ -66,7 +57,7 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
     }
 
     @Override
-    public void tick() {
+    public void update() {
         if (this.world.isRemote) return;
         if (shouldUpdateTarget()) {
             this.updateTarget();
@@ -78,35 +69,36 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
 
     private void attackTarget() {
         TileEntity tileEntity = world.getTileEntity(this.pos.down(2));
-        IItemHandler handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(EmptyHandler.INSTANCE);
+        IItemHandler handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).orElse(EmptyHandler.INSTANCE);
         double x = this.pos.getX() + 0.5;
         double y = this.pos.getY() + 0.5;
         double z = this.pos.getZ() + 0.5;
         for (int i = 0; i < handler.getSlots(); i++) {
             ItemStack result = handler.extractItem(i, 1, true);
-            if (result.getItem() instanceof ArrowItem) {
+            if (result.getItem() instanceof ItemArrow) {
                 handler.extractItem(i, 1, false);
                 Vec3d vec3d = new Vec3d(this.target.posX - x, this.target.posY + this.target.getEyeHeight() - y, this.target.posZ - z).normalize();
-                ArrowEntity arrowEntity = new ArrowEntity(world, x + vec3d.x, y + vec3d.y, z + vec3d.z);
+                EntityArrow arrowEntity = new EntityTippedArrow(world, x + vec3d.x, y + vec3d.y, z + vec3d.z);
                 arrowEntity.shoot(vec3d.x, vec3d.y, vec3d.z, 3, 1);
-                world.addEntity(arrowEntity);
+                world.spawnEntity(arrowEntity);
                 break;
             }
         }
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         if (this.placerId != null) {
-            compound.put("placer", NBTUtil.writeUniqueId(this.placerId));
+            compound.setTag("placer", NBTUtil.createUUIDTag(this.placerId));
         }
-        return super.write(compound);
+        return super.writeToNBT(compound);
     }
 
+
     @Override
-    public void read(CompoundNBT compound) {
-        super.read(compound);
-        this.placerId = NBTUtil.readUniqueId(compound.getCompound("placer"));
+    public void readFromNBT(NBTTagCompound compound) {
+        super.readFromNBT(compound);
+        this.placerId = NBTUtil.getUUIDFromTag(compound.getTag("placer"));
     }
 
     private boolean shouldAttack() {
@@ -119,10 +111,10 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
     }
 
     private boolean isValidTarget(Entity entity) {
-        if (entity instanceof MonsterEntity) {
+        if (entity instanceof EntityMob) {
             return true;
         }
-        if (entity instanceof SlimeEntity) {
+        if (entity instanceof EntitySlime) {
             return true;
         }
         return false;
@@ -138,12 +130,12 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
     }
 
     private void checkPlacer() {
-        if (placer != null && placer.removed) {
+        if (placer != null && placer.isDead) {
             placer = null;
         }
 
         if (placer == null && this.placerId != null) {
-            this.placer = world.getPlayerByUuid(this.placerId);
+            this.placer = world.getPlayerEntityByUUID(this.placerId);
         }
     }
 
@@ -151,7 +143,7 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
         World world = this.world;
         BlockPos pos = this.pos;
         this.checkPlacer();
-        List<LivingEntity> entityList = (List) world.getEntitiesInAABBexcluding(this.placer, bb, this::isValidTarget);
+        List<EntityLiving> entityList = (List) world.getEntitiesInAABBexcluding(this.placer, bb, this::isValidTarget);
         EntityPredicate predicate = new EntityPredicate();
         this.target = world.getClosestEntity(entityList, predicate, this.placer, pos.getX(), pos.getY(), pos.getZ());
     }

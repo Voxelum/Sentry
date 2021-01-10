@@ -1,9 +1,17 @@
 package voxelum.sentry.block;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ContainerBlock;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
@@ -18,19 +26,19 @@ import voxelum.sentry.tileentity.SentryShooterTileEntity;
 import javax.annotation.Nullable;
 import java.util.Random;
 
-public class SentryShooterBlock extends ContainerBlock {
-    public SentryShooterBlock(Properties properties) {
+public class SentryShooterBlock extends BlockContainer {
+    public SentryShooterBlock(Material properties) {
         super(properties);
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+    public TileEntity createNewTileEntity(World worldIn, int meta) {
         return new SentryShooterTileEntity();
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, IWorldReader worldIn, BlockPos pos) {
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
         BlockPos down = pos.down();
         if (worldIn.getBlockState(down).getBlock() == Sentry.SENTRY_SUPP_BLOCK.get()) {
             return true;
@@ -39,8 +47,8 @@ public class SentryShooterBlock extends ContainerBlock {
     }
 
     @Override
-    public void tick(BlockState state, World worldIn, BlockPos pos, Random random) {
-        if (!state.isValidPosition(worldIn, pos)) {
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        if (this.canPlaceBlockAt(worldIn, pos)) {
             worldIn.destroyBlock(pos, true);
         }
     }
@@ -59,6 +67,16 @@ public class SentryShooterBlock extends ContainerBlock {
 
         return super.updatePostPlacement(stateIn, facing, facingState, worldIn, currentPos, facingPos);
     }
+
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+        if (placer instanceof EntityPlayer) {
+            SentryShooterTileEntity tileEntity = (SentryShooterTileEntity) worldIn.getTileEntity(pos);
+            tileEntity.setPlacer((EntityPlayer) placer);
+        }
+    }
+
 
     @Override
     public BlockRenderType getRenderType(BlockState state) {

@@ -1,8 +1,8 @@
 package voxelum.sentry;
 
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraftforge.items.ItemStackHandler;
 
 public class ItemStackSentryBaseHandler extends ItemStackHandler {
@@ -12,7 +12,7 @@ public class ItemStackSentryBaseHandler extends ItemStackHandler {
 
     @Override
     public boolean isItemValid(int slot, ItemStack stack) {
-        Item item = stack.getItem().getItem();
+        Item item = stack.getItem();
         return item == Items.ARROW
                 || item == Items.SPECTRAL_ARROW;
     }
