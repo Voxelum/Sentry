@@ -1,0 +1,9 @@
+name: Bump version
+description: Bump version
+outputs:
+  version:
+    description: The release version
+runs:
+  using: 'node12'
+  main: index.js
+  

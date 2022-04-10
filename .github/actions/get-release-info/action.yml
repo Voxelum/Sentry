@@ -1,0 +1,9 @@
+name: Get Release Info
+description: Get Release Info
+outputs:
+  version:
+    description: The release version
+runs:
+  using: 'node12'
+  main: index.js
+  
