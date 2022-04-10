@@ -48,7 +48,7 @@ jobs:
         commit-message: "chore(release): version ${{ steps.version.outputs.version }}"
         title: Prepare Release ${{ steps.version.outputs.version }}
         body: ''
-        branch: prepare-release
+        branch: prepare-release-${{GITHUB_REF}}
   release:
     if: startsWith(github.event.head_commit.message, 'chore(release)')
     runs-on: ubuntu-latest
