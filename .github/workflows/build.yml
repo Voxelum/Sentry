@@ -30,14 +30,14 @@ jobs:
     #   with:
     #     artifacts: "./build/libs/*.jar"
     #     token: ${{ secrets.GITHUB_TOKEN }}
-    - uses: edgarrc/action-7z@v1.0.4
-      with:
-        args: 7z a -t7z -mx=9 build.7z ./build/libs
-    - name: Upload Build
-      uses: actions/upload-artifact@v2
-      with:
-        name: build
-        path: build.7z
+    # - uses: edgarrc/action-7z@v1.0.4
+    #   with:
+    #     args: 7z a -t7z -mx=9 build.7z ./build/libs
+    # - name: Upload Build
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: build
+    #     path: build.7z
     - name: Try bump version
       id: version
       uses: ./.github/actions/bump-version
@@ -48,7 +48,7 @@ jobs:
         commit-message: "chore(release): version ${{ steps.version.outputs.version }}"
         title: Prepare Release ${{ steps.version.outputs.version }}
         body: ''
-        branch: prepare-release-${{GITHUB_REF}}
+        branch: prepare-release-${{ env.GITHUB_REF_NAME }}
   release:
     if: startsWith(github.event.head_commit.message, 'chore(release)')
     runs-on: ubuntu-latest
