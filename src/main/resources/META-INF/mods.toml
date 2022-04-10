@@ -6,9 +6,10 @@
 # The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
 modLoader="javafml" #mandatory
 # A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="[27,)" #mandatory (28 is current forge version)
+loaderVersion="[35,)" #mandatory (28 is current forge version)
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="http://my.issue.tracker/" #optional
+license="All rights reserved"
 # A list of mods - how many allowed here is determined by the individual mod loader
 [[mods]] #mandatory
 # The modid of the mod
@@ -26,16 +27,16 @@ logoFile="sentry.png" #optional
 # A text field displayed in the mod UI
 credits="Thanks for this example mod goes to Java" #optional
 # A text field displayed in the mod UI
-authors="Eric John Reter" #optional
+authors="dozono" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-古老、传统又实用的箭塔。居家旅行必备，是你身边最强大可靠的守护。
+Ancient, traditional and practical arrow tower. A must for home travel, is the most powerful and reliable guardian around you.
 
-添加了三种箭塔方块。分别是炮基、炮身、炮台。
+Three kinds of blocks are added. They are base, body and shooter block.
 
-其中炮基负责装箭，炮塔负责🐍。放置顺序从下到上必须是炮基、炮身、炮台。
+The tower base is responsible for loading arrows and the turret is responsible for shoot. The placement order from bottom to top must be base, body, and shooter block.
 
-你需要右键点击炮基来将箭矢放入其中，如果炮身、炮台放置顺序正确，炮台将会以固定频率射击箭矢。目前只支持箭矢射击。
+You need to right click on the base block to put arrows into it, then it just works.
 
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
@@ -45,7 +46,7 @@ description='''
     # Does this dependency have to exist - if not, ordering below must be specified
     mandatory=true #mandatory
     # The version range of the depsendency
-    versionRange="[27,)" #mandatory
+    versionRange="[35,)" #mandatory
     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
     ordering="NONE"
     # Side this dependency is applied on - BOTH, CLIENT or SERVER
@@ -54,6 +55,6 @@ description='''
 [[dependencies.sentry]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.14.3,1.14.4]"
+    versionRange="[1.16,1.17)"
     ordering="NONE"
     side="BOTH"
