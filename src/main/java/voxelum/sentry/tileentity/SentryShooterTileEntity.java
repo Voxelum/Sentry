@@ -1,5 +1,6 @@
 package voxelum.sentry.tileentity;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
@@ -7,16 +8,17 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ArrowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -24,6 +26,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.EmptyHandler;
+import org.lwjgl.system.CallbackI;
 import voxelum.sentry.Sentry;
 
 import java.util.List;
@@ -62,7 +65,13 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
     @Override
     public void setPos(BlockPos posIn) {
         super.setPos(posIn);
-        bb = new AxisAlignedBB(pos.getX() - 10, pos.getY() - 3, pos.getZ() - 10, pos.getX() + 10, pos.getY() + 10, pos.getZ() + 10);
+        bb = new AxisAlignedBB(pos.getX() - 12, pos.getY() - 3, pos.getZ() - 12, pos.getX() + 12, pos.getY() + 10, pos.getZ() + 12);
+    }
+
+    @Override
+    public void setWorldAndPos(World world, BlockPos pos) {
+        super.setWorldAndPos(world, pos);
+        bb = new AxisAlignedBB(pos.getX() - 12, pos.getY() - 3, pos.getZ() - 12, pos.getX() + 12, pos.getY() + 10, pos.getZ() + 12);
     }
 
     @Override
@@ -83,13 +92,17 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
         double y = this.pos.getY() + 0.5;
         double z = this.pos.getZ() + 0.5;
         for (int i = 0; i < handler.getSlots(); i++) {
+            Vector3d direction = new Vector3d(this.target.getPosX() - x, this.target.getPosY() - y, this.target.getPosZ() - z);
+            direction = direction.normalize();
             ItemStack result = handler.extractItem(i, 1, true);
             if (result.getItem() instanceof ArrowItem) {
                 handler.extractItem(i, 1, false);
-                Vec3d vec3d = new Vec3d(this.target.posX - x, this.target.posY + this.target.getEyeHeight() - y, this.target.posZ - z).normalize();
-                ArrowEntity arrowEntity = new ArrowEntity(world, x + vec3d.x, y + vec3d.y, z + vec3d.z);
-                arrowEntity.shoot(vec3d.x, vec3d.y, vec3d.z, 3, 1);
-                world.addEntity(arrowEntity);
+                ArrowItem arrow = (ArrowItem) result.getItem();
+                AbstractArrowEntity entity = arrow.createArrow(this.world, result.getStack(), this.placer);
+                entity.setNoGravity(true);
+                entity.setPosition(x + direction.x, y + direction.y, z + direction.z);
+                entity.shoot(direction.x, direction.y, direction.z, 3, 1);
+                this.world.addEntity(entity);
                 break;
             }
         }
@@ -97,16 +110,20 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
+        super.write(compound);
         if (this.placerId != null) {
-            compound.put("placer", NBTUtil.writeUniqueId(this.placerId));
+            compound.put("placer", NBTUtil.func_240626_a_(this.placerId));
         }
         return super.write(compound);
     }
 
     @Override
-    public void read(CompoundNBT compound) {
-        super.read(compound);
-        this.placerId = NBTUtil.readUniqueId(compound.getCompound("placer"));
+    public void read(BlockState state, CompoundNBT compound) {
+        super.read(state, compound);
+        if (compound.hasUniqueId("placer")) {
+            this.placerId = compound.getUniqueId("placer");
+
+        }
     }
 
     private boolean shouldAttack() {
@@ -119,13 +136,7 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
     }
 
     private boolean isValidTarget(Entity entity) {
-        if (entity instanceof MonsterEntity) {
-            return true;
-        }
-        if (entity instanceof SlimeEntity) {
-            return true;
-        }
-        return false;
+        return entity instanceof MonsterEntity || entity instanceof SlimeEntity || (!entity.isAlive() && false);
     }
 
     private boolean shouldUpdateTarget() {
@@ -138,7 +149,7 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
     }
 
     private void checkPlacer() {
-        if (placer != null && placer.removed) {
+        if (placer != null && !placer.isAlive()) {
             placer = null;
         }
 
@@ -149,10 +160,25 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
 
     private void updateTarget() {
         World world = this.world;
-        BlockPos pos = this.pos;
         this.checkPlacer();
-        List<LivingEntity> entityList = (List) world.getEntitiesInAABBexcluding(this.placer, bb, this::isValidTarget);
-        EntityPredicate predicate = new EntityPredicate();
-        this.target = world.getClosestEntity(entityList, predicate, this.placer, pos.getX(), pos.getY(), pos.getZ());
+        if (this.bb == null) {
+            return;
+        }
+        double x = this.pos.getX() + 0.5;
+        double y = this.pos.getY() + 0.5;
+        double z = this.pos.getZ() + 0.5;
+        List<LivingEntity> entityList = (List) world.getEntitiesInAABBexcluding(placer, bb, this::isValidTarget);
+        entityList.sort((a, b) -> (int) (b.getDistanceSq(this.pos.getX(), this.pos.getY(), this.pos.getZ()) - a.getDistanceSq(this.pos.getX(), this.pos.getY(), this.pos.getZ())));
+        for (LivingEntity entity : entityList) {
+            Vector3d vec3d = new Vector3d(entity.getPosX() - x, entity.getPosY() - y, entity.getPosZ() - z);
+            vec3d = vec3d.normalize();
+            Vector3d src = vec3d.add(x, y, z);
+            BlockRayTraceResult result = this.getWorld().rayTraceBlocks(new RayTraceContext(entity.getPositionVec().add(0, entity.getEyeHeight(), 0), src, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, entity));
+            if (result.getType() == RayTraceResult.Type.MISS) {
+                this.target = entity;
+                return;
+            }
+        }
+        this.target = null;
     }
 }

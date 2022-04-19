@@ -14,6 +14,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -26,16 +29,18 @@ import javax.annotation.Nullable;
 
 public class SentryBaseBlock extends ContainerBlock {
     public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
-
+    private static final VoxelShape MY_SHAPE;
     public SentryBaseBlock(Properties properties) {
         super(properties);
         this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
     }
 
+
+
     @Override
-    public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         if (player.getHeldItem(handIn).getItem() == Sentry.SENTRY_SUPP_BLOCK_ITEM.get()) {
-            return false;
+            return ActionResultType.FAIL;
         }
         if (!worldIn.isRemote) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
@@ -43,7 +48,7 @@ public class SentryBaseBlock extends ContainerBlock {
                 player.openContainer((INamedContainerProvider) tileentity);
             }
         }
-        return true;
+        return ActionResultType.SUCCESS;
     }
 
     @Nullable
@@ -57,7 +62,7 @@ public class SentryBaseBlock extends ContainerBlock {
         if (stack.hasDisplayName()) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
             if (tileentity instanceof SentryBaseTileEntity) {
-//                ((SentryBaseTileEntity) tileentity).setCustomName(stack.getDisplayName());
+//                ((SentryBaseTileEntity) tileentity).set(stack.getDisplayName());
             }
         }
     }
@@ -98,9 +103,15 @@ public class SentryBaseBlock extends ContainerBlock {
     public BlockRenderType getRenderType(BlockState state) {
         return BlockRenderType.MODEL;
     }
-
     @Override
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.CUTOUT;
+    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+        return SentryBaseBlock.MY_SHAPE;
     }
+
+    static {
+        VoxelShape voxelShape1 = Block.makeCuboidShape(0.0, 0.0, 0.0, 16.0, 1.0, 16.0);
+        VoxelShape voxelShape2 = Block.makeCuboidShape(4.0, 3.0, 4.0, 12.0, 16.0, 12.0);
+        MY_SHAPE = VoxelShapes.or(voxelShape1,voxelShape2);
+    }
+
 }

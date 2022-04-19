@@ -5,20 +5,25 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ContainerBlock;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import voxelum.sentry.Sentry;
+
 import voxelum.sentry.tileentity.SentryShooterTileEntity;
 
 import javax.annotation.Nullable;
 import java.util.Random;
 
 public class SentryShooterBlock extends ContainerBlock {
+    private static final VoxelShape MY_SHAPE;
     public SentryShooterBlock(Properties properties) {
         super(properties);
     }
@@ -39,7 +44,7 @@ public class SentryShooterBlock extends ContainerBlock {
     }
 
     @Override
-    public void tick(BlockState state, World worldIn, BlockPos pos, Random random) {
+    public void tick(BlockState state, ServerWorld worldIn, BlockPos pos, Random random) {
         if (!state.isValidPosition(worldIn, pos)) {
             worldIn.destroyBlock(pos, true);
         }
@@ -65,9 +70,14 @@ public class SentryShooterBlock extends ContainerBlock {
         return BlockRenderType.MODEL;
     }
 
-
     @Override
-    public BlockRenderLayer getRenderLayer() {
-        return BlockRenderLayer.CUTOUT;
+    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+        return SentryShooterBlock.MY_SHAPE;
+    }
+
+    static {
+        final VoxelShape voxelShape1 = Block.makeCuboidShape(0.0, 0.0, 0.0, 16.0, 1.0, 16.0);
+        final VoxelShape voxelShape2 = Block.makeCuboidShape(4.0, 3.0, 4.0, 12.0, 16.0, 12.0);
+        MY_SHAPE = VoxelShapes.or(voxelShape1,voxelShape2);
     }
 }

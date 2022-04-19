@@ -34,11 +34,11 @@ import voxelum.sentry.tileentity.SentryShooterTileEntity;
 public class Sentry {
     public static final String MODID = "sentry";
 
-    private static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, MODID);
-    private static final DeferredRegister<Effect> EFFECTS = new DeferredRegister<>(ForgeRegistries.POTIONS, MODID);
-    private static final DeferredRegister<Block> BLOCKS = new DeferredRegister<>(ForgeRegistries.BLOCKS, MODID);
-    private static final DeferredRegister<TileEntityType<?>> TILE = new DeferredRegister<>(ForgeRegistries.TILE_ENTITIES, MODID);
-    private static final DeferredRegister<ContainerType<?>> CONTAINER = new DeferredRegister<>(ForgeRegistries.CONTAINERS, MODID);
+    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+    private static final DeferredRegister<Effect> EFFECTS = DeferredRegister.create(ForgeRegistries.POTIONS, MODID);
+    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
+    private static final DeferredRegister<TileEntityType<?>> TILE = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, MODID);
+    private static final DeferredRegister<ContainerType<?>> CONTAINER = DeferredRegister.create(ForgeRegistries.CONTAINERS, MODID);
 
     public static final String SENTRY_SUPP_BLOCK_NAME = "sentry_supp_block";
     public static final String SENTRY_BASE_BLOCK_NAME = "sentry_base_block";
