@@ -17,6 +17,7 @@ import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
@@ -27,6 +28,7 @@ import voxelum.sentry.container.SentryBaseContainer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Mod.EventBusSubscriber
 public class SentryBaseTileEntity extends TileEntity implements INamedContainerProvider {
     private ItemStackSentryBaseHandler inventory;
 
@@ -34,6 +36,7 @@ public class SentryBaseTileEntity extends TileEntity implements INamedContainerP
         super(Sentry.SENTRY_BASE_TILE_ENTITY.get());
         this.inventory = new ItemStackSentryBaseHandler(5);
     }
+
     @SubscribeEvent
     public static void onAttachTileEntity(AttachCapabilitiesEvent<TileEntity> event) {
         if ((event.getObject()).getType() == Sentry.SENTRY_BASE_TILE_ENTITY.get()) {
@@ -66,37 +69,8 @@ public class SentryBaseTileEntity extends TileEntity implements INamedContainerP
         }
     }
 
-
-//    @Override
-//    public CompoundNBT serializeNBT() {
-//        return inventory.serializeNBT();
-//    }
-//
-//    @Override
-//    public void deserializeNBT(CompoundNBT nbt) {
-//        inventory.deserializeNBT(nbt);
-//    }
-
     public ItemStackHandler getInventory() {
         return inventory;
-    }
-
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return (LazyOptional<T>) LazyOptional.of(this::getInventory);
-        }
-        return super.getCapability(cap);
-    }
-
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return (LazyOptional<T>) LazyOptional.of(this::getInventory);
-        }
-        return super.getCapability(cap, side);
     }
 
     @Override

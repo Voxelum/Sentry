@@ -35,8 +35,6 @@ public class SentryBaseBlock extends ContainerBlock {
         this.setDefaultState(this.stateContainer.getBaseState().with(FACING, Direction.NORTH));
     }
 
-
-
     @Override
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         if (player.getHeldItem(handIn).getItem() == Sentry.SENTRY_SUPP_BLOCK_ITEM.get()) {

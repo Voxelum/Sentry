@@ -15,7 +15,7 @@ public class SentryBaseContainer extends Container {
     private IItemHandlerModifiable inv;
 
     public SentryBaseContainer(int id, PlayerInventory inventory) {
-        this(id, inventory, new ItemStackSentryBaseHandler(3));
+        this(id, inventory, new ItemStackSentryBaseHandler(5));
     }
 
     public SentryBaseContainer(int id, PlayerInventory inventory, IItemHandlerModifiable itemHandlerModifiable) {

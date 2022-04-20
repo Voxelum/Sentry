@@ -10,25 +10,33 @@ import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArrowItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.NBTUtil;
+import net.minecraft.item.WrittenBookItem;
+import net.minecraft.nbt.*;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.EmptyHandler;
 import org.lwjgl.system.CallbackI;
 import voxelum.sentry.Sentry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,6 +64,21 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
     private AxisAlignedBB bb;
     private UUID placerId;
     private PlayerEntity placer;
+    private List<PlayerInfo> whiteList = new ArrayList<>();
+
+    public PlayerEntity getPlacer() {
+        return placer;
+    }
+
+    public static class PlayerInfo {
+        public final UUID uuid;
+        public final String name;
+
+        private PlayerInfo(UUID uuid, String name) {
+            this.uuid = uuid;
+            this.name = name;
+        }
+    }
 
     public SentryShooterTileEntity() {
         super(Sentry.SENTRY_SHOOTER_TILE_ENTITY.get());
@@ -83,6 +106,57 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
         if (shouldAttack()) {
             attackTarget();
         }
+    }
+
+    @SubscribeEvent
+    public void onPlayerClickEvent(PlayerInteractEvent.LeftClickBlock e){
+        World world = e.getWorld();
+        PlayerEntity player = e.getPlayer();
+
+            if (this.getPlacer() == null) {
+                return;
+            } else {
+                PlayerEntity placer = this.getPlacer();
+                ItemStackHandler handler = new ItemStackHandler();
+                ItemStack heldItem = player.getHeldItem(Hand.MAIN_HAND);
+                if (player.getUniqueID() == placer.getUniqueID() && heldItem.getItem() instanceof WrittenBookItem) {
+                    handler.extractItem(EquipmentSlotType.MAINHAND.getSlotIndex(), 1, true);
+                    CompoundNBT tag = heldItem.getTag();
+                    if (tag != null) {
+                        byte resolved = tag.getByte("resolved");
+                        if (resolved == 1) {
+                            ListNBT pages = tag.getList("pages", 8);
+                            for (INBT page : pages) {
+                                String content = page.getString();
+                                System.out.println(content);
+                                try {
+                                    IFormattableTextComponent component = ITextComponent.Serializer.getComponentFromJsonLenient(content);
+                                    component.getString();
+                                    System.out.println(component);
+                                } catch (Exception excpt) {
+                                    //2313123123123123
+                                }
+                            }
+                        } else {
+                            tag.putString("title", "WTF");
+                            tag.putString("author", "SHIT");
+                        }
+                    }
+                }
+            }
+        }
+
+
+    public void addPlayerToWhiteList(PlayerEntity e) {
+        this.whiteList.add(new PlayerInfo(e.getUniqueID(), e.getName().toString()));
+    }
+
+    public void removePlayerFromWhiteList(PlayerInfo e) {
+        this.whiteList.remove(e);
+    }
+
+    public List<PlayerInfo> getWhiteList() {
+        return whiteList;
     }
 
     private void attackTarget() {
@@ -114,6 +188,9 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
         if (this.placerId != null) {
             compound.put("placer", NBTUtil.func_240626_a_(this.placerId));
         }
+        ListNBT list = new ListNBT();
+//         fill list
+        compound.put("whitelist", list);
         return super.write(compound);
     }
 
@@ -122,6 +199,9 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
         super.read(state, compound);
         if (compound.hasUniqueId("placer")) {
             this.placerId = compound.getUniqueId("placer");
+        }
+        if (compound.contains("whitelist")) {
+            ListNBT whitelist = compound.getList("whitelist", 11);
 
         }
     }
