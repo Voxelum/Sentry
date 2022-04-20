@@ -1,9 +1,7 @@
 name: Build
 
 on:
-  push:
-    branches: 
-      - master
+  push
 
 jobs:
   build:
@@ -33,5 +31,10 @@ jobs:
     - name: Upload Build
       uses: actions/upload-artifact@v2
       with:
-        name: build
+        name: build.7z
         path: build.7z
+    - name: Upload Build
+      uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: ./build/libs
