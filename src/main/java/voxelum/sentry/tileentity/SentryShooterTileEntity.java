@@ -108,50 +108,52 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
         }
     }
 
-    @SubscribeEvent
-    public void onPlayerClickEvent(PlayerInteractEvent.LeftClickBlock e){
-        World world = e.getWorld();
-        PlayerEntity player = e.getPlayer();
-
-            if (this.getPlacer() == null) {
-                return;
-            } else {
-                PlayerEntity placer = this.getPlacer();
-                ItemStackHandler handler = new ItemStackHandler();
-                ItemStack heldItem = player.getHeldItem(Hand.MAIN_HAND);
-                if (player.getUniqueID() == placer.getUniqueID() && heldItem.getItem() instanceof WrittenBookItem) {
-                    handler.extractItem(EquipmentSlotType.MAINHAND.getSlotIndex(), 1, true);
-                    CompoundNBT tag = heldItem.getTag();
-                    if (tag != null) {
-                        byte resolved = tag.getByte("resolved");
-                        if (resolved == 1) {
-                            ListNBT pages = tag.getList("pages", 8);
-                            for (INBT page : pages) {
-                                String content = page.getString();
-                                System.out.println(content);
-                                try {
-                                    IFormattableTextComponent component = ITextComponent.Serializer.getComponentFromJsonLenient(content);
-                                    component.getString();
-                                    System.out.println(component);
-                                } catch (Exception excpt) {
-                                    //2313123123123123
-                                }
-                            }
-                        } else {
-                            tag.putString("title", "WTF");
-                            tag.putString("author", "SHIT");
-                        }
-                    }
-                }
-            }
-        }
+//    @SubscribeEvent
+//    public void onPlayerClickEvent(PlayerInteractEvent.LeftClickBlock e){
+//        World world = e.getWorld();
+//        PlayerEntity player = e.getPlayer();
+//
+//            if (this.getPlacer() == null) {
+//                return;
+//            } else {
+//                PlayerEntity placer = this.getPlacer();
+//                ItemStackHandler handler = new ItemStackHandler();
+//                ItemStack heldItem = player.getHeldItem(Hand.MAIN_HAND);
+//                if (player.getUniqueID() == placer.getUniqueID() && heldItem.getItem() instanceof WrittenBookItem) {
+//                    handler.extractItem(EquipmentSlotType.MAINHAND.getSlotIndex(), 1, true);
+//                    CompoundNBT tag = heldItem.getTag();
+//                    if (tag != null) {
+//                        byte resolved = tag.getByte("resolved");
+//                        if (resolved == 1) {
+//                            ListNBT pages = tag.getList("pages", 8);
+//                            for (INBT page : pages) {
+//                                String content = page.getString();
+//                                System.out.println(content);
+//                                try {
+//                                    IFormattableTextComponent component = ITextComponent.Serializer.getComponentFromJsonLenient(content);
+//                                    component.getString();
+//                                    System.out.println(component);
+//                                } catch (Exception excpt) {
+//                                    //2313123123123123
+//                                }
+//                            }
+//                        } else {
+//                            tag.putString("title", "WTF");
+//                            tag.putString("author", "SHIT");
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
 
     public void addPlayerToWhiteList(PlayerEntity e) {
-        this.whiteList.add(new PlayerInfo(e.getUniqueID(), e.getName().toString()));
+        System.out.println("add " + e.getGameProfile().getName());
+        this.whiteList.add(new PlayerInfo(e.getUniqueID(), e.getGameProfile().getName()));
     }
 
     public void removePlayerFromWhiteList(PlayerInfo e) {
+        System.out.println("remove " + e.name);
         this.whiteList.remove(e);
     }
 
@@ -216,7 +218,17 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
     }
 
     private boolean isValidTarget(Entity entity) {
-        return entity instanceof MonsterEntity || entity instanceof SlimeEntity || (!entity.isAlive() && false);
+        if (!entity.isAlive()) {
+            return false;
+        }
+        if (entity instanceof PlayerEntity) {
+            PlayerEntity playerEntity = (PlayerEntity) entity;
+            if (whiteList.stream().noneMatch(c -> c.name.equalsIgnoreCase(playerEntity.getGameProfile().getName()))) {
+                return true;
+            }
+        }
+        return entity instanceof MonsterEntity
+                || entity instanceof SlimeEntity;
     }
 
     private boolean shouldUpdateTarget() {

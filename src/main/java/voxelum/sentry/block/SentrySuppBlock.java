@@ -26,6 +26,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.*;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.items.ItemStackHandler;
@@ -98,18 +99,21 @@ public class SentrySuppBlock extends Block {
                             byte resolved = tag.getByte("resolved");
                             if (resolved == 0) {
                                 ListNBT pages = tag.getList("pages", 8);
-                                Stream<String> newList = pages.stream().map(p -> Arrays.stream(p.getString().split("\n")).filter(v -> v.length() > 0))
+                                List<String> newList = pages.stream().map(p -> Arrays.stream(p.getString().split("\n")).filter(v -> v.length() > 0))
                                         .reduce(Stream::concat)
-                                        .orElse(Stream.empty());
-                                Stream<SentryShooterTileEntity.PlayerInfo> oldList = whiteList.stream();
-                                newList
-                                        .filter((name) -> oldList.noneMatch(v -> Objects.equals(v.name, name)))
+                                        .orElse(Stream.empty()).collect(Collectors.toList());
+//                                Stream<SentryShooterTileEntity.PlayerInfo> oldList = whiteList.stream();
+                                newList.stream()
+                                        .filter((name) -> whiteList.stream().noneMatch(v -> Objects.equals(v.name, name)))
                                         .map((name) -> server.getPlayerList().getPlayerByUsername(name))
                                         .filter(Objects::nonNull)
                                         .forEach(tileEntity::addPlayerToWhiteList);
-                                oldList
-                                        .filter((info) -> newList.noneMatch(v -> Objects.equals(v, info.name)))
+                                whiteList.stream()
+                                        .filter((info) -> newList.stream().noneMatch(v -> Objects.equals(v, info.name)))
                                         .forEach(tileEntity::removePlayerFromWhiteList);
+                                for (int i = 0; i < whiteList.size(); i++) {
+                                    placer.sendMessage(new StringTextComponent(whiteList.get(i).name), placer.getUniqueID());
+                                }
                             } else {
 
                             }
