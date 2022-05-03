@@ -174,12 +174,22 @@ public class SentryShooterTileEntity extends TileEntity implements ITickableTile
             if (result.getItem() instanceof ArrowItem) {
                 handler.extractItem(i, 1, false);
                 ArrowItem arrow = (ArrowItem) result.getItem();
-                AbstractArrowEntity entity = arrow.createArrow(this.world, result.getStack(), this.placer);
-                entity.setNoGravity(true);
-                entity.setPosition(x + direction.x, y + direction.y, z + direction.z);
-                entity.shoot(direction.x, direction.y, direction.z, 3, 1);
-                this.world.addEntity(entity);
-                break;
+                if(this.placer==null){
+                    AbstractArrowEntity entity = arrow.createArrow(this.world, result.getStack(), this.world.getClosestPlayer(pos.getX(),pos.getY(), pos.getZ(), 500,false));
+                    entity.setNoGravity(true);
+                    entity.setPosition(x + direction.x, y + direction.y, z + direction.z);
+                    entity.shoot(direction.x, direction.y, direction.z, 3, 1);
+                    this.world.addEntity(entity);
+                    break;
+                }else{
+
+                    AbstractArrowEntity entity = arrow.createArrow(this.world, result.getStack(), this.placer);
+                    entity.setNoGravity(true);
+                    entity.setPosition(x + direction.x, y + direction.y, z + direction.z);
+                    entity.shoot(direction.x, direction.y, direction.z, 3, 1);
+                    this.world.addEntity(entity);
+                    break;
+                }
             }
         }
     }
